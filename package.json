@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.12.0",
-    "@robpc/logger": "^1.0.5",
+    "@robpc/logger": "^1.1.0",
     "semver": "^7.3.5"
   }
 }

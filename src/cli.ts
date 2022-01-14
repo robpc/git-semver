@@ -4,6 +4,7 @@ import LoggerFactory from "@robpc/logger";
 import getTagVersion from "./index";
 import { BranchOptions } from "./types";
 
+LoggerFactory.setStderrOutput(true);
 LoggerFactory.setLogLevel("DEBUG");
 
 const logger = LoggerFactory.get("git-semver-cli");
@@ -28,7 +29,7 @@ const main = async () => {
     branches,
   });
 
-  logger.info("version:", version);
+  console.log(version);
 };
 
 main();
