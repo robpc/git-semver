@@ -43,73 +43,75 @@ const makeCommitComparison = (data) =>
     )
   );
 
-test("is just the tag when using tag commit", async () => {
-  mockedGithub.branches = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
-  mockedGithub.tags = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
-  mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
-    if (to == "feature-four")
-      return makeCommitComparison({ status: "ahead", ahead_by: 2 });
-    if (from == "1.1.0")
-      return makeCommitComparison({ status: "behind", ahead_by: 0 });
-    if (from == "1.0.0")
-      return makeCommitComparison({ status: "identical", ahead_by: 0 });
-    throw new Error(`Unaxpected params, from:${from} to:${to}`);
-  });
-  await expect(
-    tagVersion("robpc", "git-version-tests-alpha", "88f8ebe", {})
-  ).resolves.toBe("1.0.0");
-});
-
-test("is incremented from tag", async () => {
-  mockedGithub.branches = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
-  mockedGithub.tags = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
-  mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
-    if (to == "feature-four")
-      return makeCommitComparison({ status: "identical", ahead_by: 0 });
-    if (to == "main")
-      return makeCommitComparison({ status: "ahead", ahead_by: 1 });
-    if (from == "1.1.0")
-      return makeCommitComparison({ status: "behind", ahead_by: 0 });
-    if (from == "1.0.0")
-      return makeCommitComparison({ status: "ahead", ahead_by: 2 });
-    throw new Error(`Unaxpected params, from:${from} to:${to}`);
+describe("tagVersion", () => {
+  test("is just the tag when using tag commit", async () => {
+    mockedGithub.branches = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
+    mockedGithub.tags = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
+    mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
+      if (to == "feature-four")
+        return makeCommitComparison({ status: "ahead", ahead_by: 2 });
+      if (from == "1.1.0")
+        return makeCommitComparison({ status: "behind", ahead_by: 0 });
+      if (from == "1.0.0")
+        return makeCommitComparison({ status: "identical", ahead_by: 0 });
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
+    await expect(
+      tagVersion("robpc", "git-version-tests-alpha", "88f8ebe", {})
+    ).resolves.toBe("1.0.0");
   });
 
-  await expect(
-    tagVersion("robpc", "git-version-tests-alpha", "ddf0a84", {})
-  ).resolves.toBe("1.0.1-feature-four.2");
-});
+  test("is incremented from tag", async () => {
+    mockedGithub.branches = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
+    mockedGithub.tags = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
+    mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
+      if (to == "feature-four")
+        return makeCommitComparison({ status: "identical", ahead_by: 0 });
+      if (to == "main")
+        return makeCommitComparison({ status: "ahead", ahead_by: 1 });
+      if (from == "1.1.0")
+        return makeCommitComparison({ status: "behind", ahead_by: 0 });
+      if (from == "1.0.0")
+        return makeCommitComparison({ status: "ahead", ahead_by: 2 });
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
 
-test("uses prerelease", async () => {
-  mockedGithub.branches = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
-  mockedGithub.tags = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
-  mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
-    if (to == "feature-four")
-      return makeCommitComparison({ status: "identical", ahead_by: 0 });
-    if (to == "main")
-      return makeCommitComparison({ status: "ahead", ahead_by: 1 });
-    if (from == "1.1.0")
-      return makeCommitComparison({ status: "behind", ahead_by: 0 });
-    if (from == "1.0.0")
-      return makeCommitComparison({ status: "ahead", ahead_by: 2 });
-    throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    await expect(
+      tagVersion("robpc", "git-version-tests-alpha", "ddf0a84", {})
+    ).resolves.toBe("1.0.1-feature-four.2");
   });
 
-  await expect(
-    tagVersion("robpc", "git-version-tests-alpha", "ddf0a84", {
-      branches: [{ filter: "feature-.*", prerelease: "beta" }],
-    })
-  ).resolves.toBe("1.0.1-beta.2");
+  test("uses prerelease", async () => {
+    mockedGithub.branches = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["feature-four", "main"]));
+    mockedGithub.tags = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(["1.1.0", "1.0.0"]));
+    mockedGithub.range = jest.fn().mockImplementation((_a, _b, from, to) => {
+      if (to == "feature-four")
+        return makeCommitComparison({ status: "identical", ahead_by: 0 });
+      if (to == "main")
+        return makeCommitComparison({ status: "ahead", ahead_by: 1 });
+      if (from == "1.1.0")
+        return makeCommitComparison({ status: "behind", ahead_by: 0 });
+      if (from == "1.0.0")
+        return makeCommitComparison({ status: "ahead", ahead_by: 2 });
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
+
+    await expect(
+      tagVersion("robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: "feature-.*", prerelease: "beta" }],
+      })
+    ).resolves.toBe("1.0.1-beta.2");
+  });
 });
