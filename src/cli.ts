@@ -28,7 +28,7 @@ const main = async () => {
     branches,
   });
 
-  logger.info("version: ", version);
+  logger.info("version:", version);
 };
 
 main();

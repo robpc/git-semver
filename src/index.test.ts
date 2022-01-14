@@ -5,8 +5,6 @@ import github from "./github";
 
 const mockedGithub = jest.mocked(github, true);
 
-jest.setTimeout(15 * 1000);
-
 // "commit-comparison": {
 //   url: string;
 //   html_url: string;
