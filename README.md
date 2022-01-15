@@ -43,9 +43,7 @@ Also requires a GitHub token in the env var `GITHUB_TOKEN`
 _example_
 
 ```bash
-$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 > version.txt
-# ...
-$ cat version.txt
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
 2.0.5-main.4
 ```
 
@@ -69,5 +67,3 @@ const version = await gitSemver(token, owner, repo, ref, {
   branches,
 });
 ```
-
-Also requires a GitHub token in the env var `GITHUB_TOKEN`
