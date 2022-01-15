@@ -1,5 +1,7 @@
 # git-semver
 
+_NOTE: Still in prerelease for experimentation_
+
 Determines the [semantic version](semver.org) based on commit distance since the last tag.
 
     |
@@ -30,6 +32,27 @@ Branches are prioritized based on the following list:
 
 ## Usage
 
+## Command Line
+
     $ npx @robpc/git-semver {org} {repo} {ref}
+
+Also requires a GitHub token in the env var `GITHUB_TOKEN`
+
+## Module
+
+    import getTagVersion from "@robpc/git-semver";
+
+    // ...
+
+    const branches: BranchOptions[] = [
+        { filter: "(main|master)", prerelease: 'rc' },
+        { filter: "hotfix-.*", sort: "asc" },
+        { filter: "dev(elop)?", prerelease: 'beta' },
+        { filter: ".*" },
+    ];
+
+    const version = await getTagVersion(owner, repo, ref, {
+        branches,
+    });
 
 Also requires a GitHub token in the env var `GITHUB_TOKEN`
