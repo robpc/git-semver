@@ -22,7 +22,10 @@ import { BranchOptions } from "./types";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 LoggerFactory.setStderrOutput(true);
-LoggerFactory.setLogLevel("DEBUG");
+
+if (process.env.GIT_SEMVER_DEBUG) {
+  LoggerFactory.setLogLevel("DEBUG");
+}
 
 const logger = LoggerFactory.get("git-semver-cli");
 
