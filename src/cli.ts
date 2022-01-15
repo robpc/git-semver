@@ -25,11 +25,13 @@ LoggerFactory.setLogLevel("DEBUG");
 const logger = LoggerFactory.get("git-semver-cli");
 
 const main = async () => {
-  const [owner, repo, ref] = process.argv.slice(2);
+  const [repository, reference] = process.argv.slice(2);
+
+  const [owner, name] = repository.split("/");
 
   logger.info(`Owner: ${owner}`);
-  logger.info(`Repo: ${repo}`);
-  logger.info(`Ref: ${ref}`);
+  logger.info(`Name: ${name}`);
+  logger.info(`Reference: ${reference}`);
 
   const branches: BranchOptions[] = [
     { filter: "(main|master)" },
@@ -40,7 +42,7 @@ const main = async () => {
     { filter: ".*" },
   ];
 
-  const version = await getTagVersion(owner, repo, ref, {
+  const version = await getTagVersion(owner, name, reference, {
     branches,
   });
 

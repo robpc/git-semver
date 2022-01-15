@@ -38,9 +38,9 @@
     "watch": "parcel watch",
     "build": "parcel build",
     "test": "jest",
-    "example:alpha": "env-cmd npm run start robpc git-version-tests-alpha 88f8ebe",
-    "example:alpha2": "env-cmd npm run start robpc git-version-tests-alpha a7b54fe",
-    "example:alpha3": "env-cmd npm run start robpc git-version-tests-alpha ddf0a84"
+    "example:alpha": "env-cmd npm run start robpc/git-version-tests-alpha 88f8ebe",
+    "example:alpha2": "env-cmd npm run start robpc/git-version-tests-alpha a7b54fe",
+    "example:alpha3": "env-cmd npm run start robpc/git-version-tests-alpha ddf0a84"
   },
   "author": "Rob Cannon",
   "license": "MIT",

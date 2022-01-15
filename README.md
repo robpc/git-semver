@@ -32,13 +32,13 @@ Branches are prioritized based on the following list:
 
 ## Usage
 
-## Command Line
+### Command Line
 
     $ npx @robpc/git-semver {org} {repo} {ref}
 
 Also requires a GitHub token in the env var `GITHUB_TOKEN`
 
-## Module
+### Module
 
     import getTagVersion from "@robpc/git-semver";
 
