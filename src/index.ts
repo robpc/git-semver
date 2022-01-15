@@ -103,6 +103,62 @@ const findTag = async (
   return [foundTag, foundTagDistance];
 };
 
+/**
+ * Generates the equivalent to the the `git describe` command
+ *
+ * @param owner Github owner
+ * @param repo  Github repo name
+ * @param ref git reference to version
+ * @param options
+ * @returns version as a string
+ */
+const gitDescribe = async (
+  owner: string,
+  repo: string,
+  ref: string,
+  options: TagVersionOptions
+): Promise<string> => {
+  const tagPriority = options.tags || [{ filter: ".*" }];
+
+  const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
+
+  const sha = await github.sha(owner, repo, ref);
+  logger.trace("sha", sha);
+
+  const short_hash = sha.substr(0, 10);
+
+  const describe = distance > 0 ? `${tag}-${distance}-g${short_hash}` : tag;
+
+  return describe;
+};
+
+const genVersion = (
+  base: string,
+  prerelease: string,
+  distance: number,
+  increment: IncrementOptions = "patch"
+): string => {
+  let baseVersion = gentleCoerce(base);
+
+  if (distance > 0) {
+    baseVersion =
+      increment == "none" ? baseVersion : semverInc(baseVersion, increment);
+
+    return `${baseVersion}-${prerelease}.${distance}`;
+  }
+
+  return baseVersion;
+};
+
+/**
+ * Historical version that is technically not semver
+ *
+ * @param owner Github owner
+ * @param repo  Github repo name
+ * @param ref git reference to version
+ * @param options
+ * @returns version as a string
+ */
 const robVersion = async (
   owner: string,
   repo: string,
@@ -115,10 +171,19 @@ const robVersion = async (
   const branch = await findBranch(owner, repo, ref, branchPriority);
   const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
 
-  return genVersion(tag, branch, distance, "none");
+  return genVersion(tag, sanitizePrerelease(branch), distance, "none");
 };
 
-const tagVersion = async (
+/**
+ * Generates a deterministic semver of the github reference
+ *
+ * @param owner Github owner
+ * @param repo  Github repo name
+ * @param ref git reference to version
+ * @param options
+ * @returns version as a string
+ */
+const gitSemver = async (
   owner: string,
   repo: string,
   ref: string,
@@ -145,50 +210,5 @@ const tagVersion = async (
   return genVersion(tag, prerelease, distance, increment);
 };
 
-const gitDescribe = async (
-  owner: string,
-  repo: string,
-  ref: string,
-  options: TagVersionOptions
-): Promise<string> => {
-  const tagPriority = options.tags || [{ filter: ".*" }];
-
-  const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
-
-  const sha = await github.sha(owner, repo, ref);
-  logger.trace("sha", sha);
-
-  const describe = genDescribe(sha, tag, distance);
-  logger.info("describe", describe);
-
-  return describe;
-};
-
-const genDescribe = (sha: string, tag: string, distance: number): string => {
-  const short_hash = sha.substr(0, 10);
-
-  const describe = distance > 0 ? `${tag}-${distance}-g${short_hash}` : tag;
-
-  return describe;
-};
-
-const genVersion = (
-  base: string,
-  prerelease: string,
-  distance: number,
-  increment: IncrementOptions = "patch"
-): string => {
-  let baseVersion = gentleCoerce(base);
-
-  if (distance > 0) {
-    baseVersion =
-      increment == "none" ? baseVersion : semverInc(baseVersion, increment);
-
-    return `${baseVersion}-${prerelease}.${distance}`;
-  }
-
-  return baseVersion;
-};
-
-export default tagVersion;
+export default gitSemver;
 export { robVersion, gitDescribe };

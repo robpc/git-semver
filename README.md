@@ -34,25 +34,29 @@ Branches are prioritized based on the following list:
 
 ### Command Line
 
-    $ npx @robpc/git-semver {org} {repo} {ref}
+```bash
+$ npx @robpc/git-semver {repository} {ref}
+```
 
 Also requires a GitHub token in the env var `GITHUB_TOKEN`
 
 ### Module
 
-    import getTagVersion from "@robpc/git-semver";
+```js
+import gitSemver from "@robpc/git-semver";
 
-    // ...
+// ...
 
-    const branches: BranchOptions[] = [
-        { filter: "(main|master)", prerelease: 'rc' },
-        { filter: "hotfix-.*", sort: "asc" },
-        { filter: "dev(elop)?", prerelease: 'beta' },
-        { filter: ".*" },
-    ];
+const branches: BranchOptions[] = [
+  { filter: "(main|master)", prerelease: "rc" },
+  { filter: "hotfix-.*", sort: "asc" },
+  { filter: "dev(elop)?", prerelease: "beta" },
+  { filter: ".*" },
+];
 
-    const version = await getTagVersion(owner, repo, ref, {
-        branches,
-    });
+const version = await gitSemver(owner, repo, ref, {
+  branches,
+});
+```
 
 Also requires a GitHub token in the env var `GITHUB_TOKEN`

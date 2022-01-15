@@ -16,7 +16,7 @@
  */
 import LoggerFactory from "@robpc/logger";
 
-import getTagVersion from "./index";
+import gitSemver from "./index";
 import { BranchOptions } from "./types";
 
 LoggerFactory.setStderrOutput(true);
@@ -42,7 +42,7 @@ const main = async () => {
     { filter: ".*" },
   ];
 
-  const version = await getTagVersion(owner, name, reference, {
+  const version = await gitSemver(owner, name, reference, {
     branches,
   });
 
