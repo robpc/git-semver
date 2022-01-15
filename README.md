@@ -1,6 +1,6 @@
 # git-semver
 
-Use `git-semver` to generate a valid [sematic version](semver.org) on any commit based on the distance to the the last tagged version.
+Use `git-semver` to generate a valid [sematic version](semver.org) on any commit based on the distance to the last tagged version.
 
     |
     O - v1.2.1 <-------- git-semver (A) = 1.2.1
@@ -17,7 +17,7 @@ Use `git-semver` to generate a valid [sematic version](semver.org) on any commit
     |
     *  main
 
-This utility starts with the the closest `semver` tag before the requested commit. If the commit is the same as the tag commit it returns that version (see ex. `A` above). If the commit is not the same as the tag commit, `git-semver` returns the next patch version with a prerelease identifier. The prerelease identifier will be the sanitized version of the branch followed by the commit distance to the tag version (see ex. `B` above).
+The `git-semver` utility starts with the the closest `semver` tag before the requested commit. If the commit is the same as the tag commit, that version is returned (see ex. `A` above). If the requested commit is not the same as the tag commit, `git-semver` returns the next patch version with a prerelease identifier. The prerelease identifier will be the branch followed by the commit distance to the tag version sanitized for semver (see ex. `B` above).
 
 Unlike other libraries this `git-semver` uses the Github API ([https://github.com/octokit/octokit.js](octokit.js)) and does not require downloading the entire commit history. Downloading the entire commit history can be burdensome for large repos, This library is perfect for use in CB/CI where detached HEADs are downloaded by default.
 
