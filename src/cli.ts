@@ -19,6 +19,8 @@ import LoggerFactory from "@robpc/logger";
 import gitSemver from "./index";
 import { BranchOptions } from "./types";
 
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
 LoggerFactory.setStderrOutput(true);
 LoggerFactory.setLogLevel("DEBUG");
 
@@ -42,7 +44,7 @@ const main = async () => {
     { filter: ".*" },
   ];
 
-  const version = await gitSemver(owner, name, reference, {
+  const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
     branches,
   });
 

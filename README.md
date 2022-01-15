@@ -40,12 +40,23 @@ $ npx @robpc/git-semver {repository} {ref}
 
 Also requires a GitHub token in the env var `GITHUB_TOKEN`
 
+_example_
+
+```bash
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 > version.txt
+# ...
+$ cat version.txt
+2.0.5-main.4
+```
+
 ### Module
 
 ```js
 import gitSemver from "@robpc/git-semver";
 
 // ...
+
+const token = process.env.GITHUB_TOKEN;
 
 const branches: BranchOptions[] = [
   { filter: "(main|master)", prerelease: "rc" },
@@ -54,7 +65,7 @@ const branches: BranchOptions[] = [
   { filter: ".*" },
 ];
 
-const version = await gitSemver(owner, repo, ref, {
+const version = await gitSemver(token, owner, repo, ref, {
   branches,
 });
 ```

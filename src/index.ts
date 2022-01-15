@@ -16,7 +16,7 @@
 import LoggerFactory from "@robpc/logger";
 import semverInc from "semver/functions/inc.js";
 
-import github from "./github";
+import Github from "./github";
 
 import {
   BranchOptions,
@@ -29,12 +29,11 @@ import { gentleCoerce, sanitizePrerelease, sortByRegexList } from "./helpers";
 const logger = LoggerFactory.get("git-semver-lib");
 
 const findBranch = async (
-  owner: string,
-  repo: string,
+  github: Github,
   ref: string,
   branchPriority: Array<BranchOptions>
 ) => {
-  const branchNames = await github.branches(owner, repo);
+  const branchNames = await github.branches();
   logger.debug("All branches:", branchNames.join(", "));
 
   const branches = sortByRegexList(branchNames, branchPriority);
@@ -44,7 +43,7 @@ const findBranch = async (
   for (let i = 0; i < branches.length; i++) {
     const branch = branches[i];
 
-    const compare = await github.range(owner, repo, ref, branch);
+    const compare = await github.range(ref, branch);
     logger.trace("compare branch", branch, {
       status: compare.status,
       ahead_by: compare.ahead_by,
@@ -62,12 +61,11 @@ const findBranch = async (
 };
 
 const findTag = async (
-  owner: string,
-  repo: string,
+  github: Github,
   ref: string,
   tagPriority: Array<TagOptions>
 ): Promise<[string, number]> => {
-  const tagNames = await github.tags(owner, repo);
+  const tagNames = await github.tags();
   logger.debug("All tags:", tagNames.join(", "));
 
   const tags =
@@ -81,7 +79,7 @@ const findTag = async (
   for (let i = 0; i < tags.length; i++) {
     const tag = tags[i];
 
-    const compare = await github.range(owner, repo, tag, ref, 0);
+    const compare = await github.range(tag, ref, 0);
     logger.trace("compare tags", tag, {
       status: compare.status,
       ahead_by: compare.ahead_by,
@@ -113,16 +111,19 @@ const findTag = async (
  * @returns version as a string
  */
 const gitDescribe = async (
+  token: string,
   owner: string,
   repo: string,
   ref: string,
   options: TagVersionOptions
 ): Promise<string> => {
+  const github = new Github(token, owner, repo);
+
   const tagPriority = options.tags || [{ filter: ".*" }];
 
-  const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
+  const [tag, distance] = await findTag(github, ref, tagPriority);
 
-  const sha = await github.sha(owner, repo, ref);
+  const sha = await github.sha(ref);
   logger.trace("sha", sha);
 
   const short_hash = sha.substr(0, 10);
@@ -160,16 +161,19 @@ const genVersion = (
  * @returns version as a string
  */
 const robVersion = async (
+  token: string,
   owner: string,
   repo: string,
   ref: string,
   options: TagVersionOptions
 ): Promise<string> => {
+  const github = new Github(token, owner, repo);
+
   const branchPriority = options.branches || [{ filter: ".*" }];
   const tagPriority = options.tags || [{ filter: ".*" }];
 
-  const branch = await findBranch(owner, repo, ref, branchPriority);
-  const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
+  const branch = await findBranch(github, ref, branchPriority);
+  const [tag, distance] = await findTag(github, ref, tagPriority);
 
   return genVersion(tag, sanitizePrerelease(branch), distance, "none");
 };
@@ -184,16 +188,19 @@ const robVersion = async (
  * @returns version as a string
  */
 const gitSemver = async (
+  token: string,
   owner: string,
   repo: string,
   ref: string,
   options: TagVersionOptions
 ): Promise<string> => {
+  const github = new Github(token, owner, repo);
+
   const branchPriority = options.branches || [{ filter: ".*" }];
   const tagPriority = options.tags || [{ filter: ".*" }];
 
-  const branch = await findBranch(owner, repo, ref, branchPriority);
-  const [tag, distance] = await findTag(owner, repo, ref, tagPriority);
+  const branch = await findBranch(github, ref, branchPriority);
+  const [tag, distance] = await findTag(github, ref, tagPriority);
 
   const branchOption = branchPriority.find(({ filter }) =>
     new RegExp(`^${filter}$`).test(branch)

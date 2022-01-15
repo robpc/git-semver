@@ -15,67 +15,61 @@
  */
 import { Octokit } from "@octokit/rest";
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+class Github {
+  private owner: string;
+  private repo: string;
 
-const octokit = new Octokit({
-  auth: GITHUB_TOKEN,
-});
+  private octokit: Octokit;
 
-const branches = async (owner: string, repo: string) => {
-  const { data: branches } = await octokit.rest.repos.listBranches({
-    owner,
-    repo,
-  });
+  constructor(token: string, owner: string, repo: string) {
+    this.octokit = new Octokit({
+      auth: token,
+    });
 
-  return branches.map(({ name }) => name);
-};
+    this.owner = owner;
+    this.repo = repo;
+  }
 
-const tags = async (owner: string, repo: string) =>
-  octokit
-    .paginate(octokit.rest.repos.listTags, {
-      owner,
-      repo,
-    })
-    .then((tags) => tags.map(({ name }) => name));
+  branches = async () => {
+    const { data: branches } = await this.octokit.rest.repos.listBranches({
+      owner: this.owner,
+      repo: this.repo,
+    });
 
-const sha = async (
-  owner: string,
-  repo: string,
-  ref: string
-): Promise<string> => {
-  const { data } = await octokit.rest.repos.getCommit({
-    owner,
-    repo,
-    ref,
-    mediaType: {
-      format: "sha",
-    },
-  });
+    return branches.map(({ name }) => name);
+  };
 
-  return data as unknown as string;
-};
+  tags = async () =>
+    this.octokit
+      .paginate(this.octokit.rest.repos.listTags, {
+        owner: this.owner,
+        repo: this.repo,
+      })
+      .then((tags) => tags.map(({ name }) => name));
 
-const range = async (
-  owner: string,
-  repo: string,
-  from: string,
-  to: string,
-  perPage: number = 100
-) => {
-  const { data } = await octokit.rest.repos.compareCommitsWithBasehead({
-    owner,
-    repo,
-    basehead: `${from}...${to}`,
-    per_page: perPage,
-  });
+  sha = async (ref: string): Promise<string> => {
+    const { data } = await this.octokit.rest.repos.getCommit({
+      owner: this.owner,
+      repo: this.repo,
+      ref,
+      mediaType: {
+        format: "sha",
+      },
+    });
 
-  return data;
-};
+    return data as unknown as string;
+  };
 
-export default {
-  octokit,
-  branches,
-  tags,
-  sha,
-  range,
-};
+  range = async (from: string, to: string, perPage: number = 100) => {
+    const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
+      owner: this.owner,
+      repo: this.repo,
+      basehead: `${from}...${to}`,
+      per_page: perPage,
+    });
+
+    return data;
+  };
+}
+
+export default Github;
