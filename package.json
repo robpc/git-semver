@@ -1,6 +1,6 @@
 {
   "name": "@robpc/git-semver",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Determines version based on commits since the last tag",
   "repository": "github:robpc/git-semver",
   "targets": {
