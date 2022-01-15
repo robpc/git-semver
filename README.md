@@ -2,7 +2,7 @@
 
 _NOTE: Still in prerelease for experimentation_
 
-Determines the [semantic version](semver.org) based on commit distance since the last tag.
+Use `git-semver` to generate a valid [sematic version](semver.org) on any commit based on the distance to the the last tagged version.
 
     |
     O - v1.2.1 <-------- git-semver (A) = 1.2.1
@@ -19,9 +19,9 @@ Determines the [semantic version](semver.org) based on commit distance since the
     |
     *  main
 
-`git-semver` uses the closest `semver` tag. If the commit is the tag commit it returns that version (see ex. `A` above). If the commit is not the tag commit, `git-semver` returns the next patch version with a `prerelease` version. The prerelease version will contain the branch sanitized for semver followed by the commit distance to the tag version (see ex. `B` above).
+This utility starts with the the closest `semver` tag before the requested commit. If the commit is the same as the tag commit it returns that version (see ex. `A` above). If the commit is not the same as the tag commit, `git-semver` returns the next patch version with a prerelease identifier. The prerelease identifier will be the sanitized version of the branch followed by the commit distance to the tag version (see ex. `B` above).
 
-Unlike other libraries this this version uses the Octokit.js API and does not require downloading the entire commit history. Downloading the entire commit history can be burdensome for large repos, This library is perfect for use in CB/CI where detached HEADs are downloaded by default.
+Unlike other libraries this `git-semver` uses the Github API ([https://github.com/octokit/octokit.js](octokit.js)) and does not require downloading the entire commit history. Downloading the entire commit history can be burdensome for large repos, This library is perfect for use in CB/CI where detached HEADs are downloaded by default.
 
 ## Usage
 
@@ -33,7 +33,7 @@ $ npx @robpc/git-semver {repository} {ref}
 
 Requires a GitHub token in the env var `GITHUB_TOKEN`.
 
-Branches are prioritized based on the following list:
+Branches are prioritized based on the following:
 
 - `(main|master)`
 - `*v?\\d+(\\.\\d+)?(\\.\\d+)?`
@@ -78,6 +78,8 @@ jobs:
 ```
 
 ### Module
+
+_NOTE: More options are available using this as a library, but needs more documentation. See the example below._
 
 ```js
 import gitSemver from "@robpc/git-semver";

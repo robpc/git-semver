@@ -1,7 +1,7 @@
 {
   "name": "@robpc/git-semver",
   "version": "0.1.6",
-  "description": "Determines version based on commits since the last tag",
+  "description": "Generates a valid semver of any commit based on the distance to the last semver tag",
   "repository": "github:robpc/git-semver",
   "targets": {
     "main": {
