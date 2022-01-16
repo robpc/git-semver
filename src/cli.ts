@@ -14,12 +14,11 @@
  * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
  * OR PERFORMANCE OF THIS SOFTWARE.
  */
+import { Command } from "commander";
 import LoggerFactory from "@robpc/logger";
 
 import gitSemver from "./index";
 import { BranchOptions } from "./types";
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 LoggerFactory.setStderrOutput(true);
 
@@ -29,39 +28,32 @@ if (process.env.GIT_SEMVER_DEBUG) {
 
 const logger = LoggerFactory.get("git-semver-cli");
 
-const main = async () => {
-  if (!GITHUB_TOKEN) {
-    logger.error("Missing required 'GITHUB_TOKEN' in environment variables");
-    process.exit(1);
-  }
+const main = async (argv, env) => {
+  const { GITHUB_TOKEN } = env;
 
-  if (process.argv.length < 4) {
-    logger.error(
-      "Missing required arguments, expected two arguments for 'repository' and 'reference'"
+  if (!GITHUB_TOKEN) {
+    process.stderr.write(
+      "error: missing 'GITHUB_TOKEN' in environment variables\n"
     );
     process.exit(1);
   }
 
-  const [repository, reference] = process.argv.slice(2);
+  const program = new Command();
+  program
+    .argument("<repository>", "github repository as <owner>/<name>")
+    .argument("<reference>", "commit reference to version")
+    .parse(argv, { from: "user" });
+
+  if (!argv.length) {
+    program.help({ error: true });
+  }
+
+  const [repository, reference] = program.args;
 
   const [owner, name] = repository.split("/");
 
-  if (!owner) {
-    logger.error(
-      `Invalid github repository owner '${owner}' from repository argument '${repository}'`
-    );
-    process.exit(1);
-  }
-
-  if (!name) {
-    logger.error(
-      `Invalid github repository name '${name}' from repository argument '${repository}'`
-    );
-    process.exit(1);
-  }
-
-  if (!reference) {
-    logger.error(`Invalid github reference '${reference}'`);
+  if (!owner || !name) {
+    process.stderr.write("error: format for 'repository' is <owner>/<name>\n");
     process.exit(1);
   }
 
@@ -85,4 +77,8 @@ const main = async () => {
   console.log(version);
 };
 
-main();
+if (!module.parent) {
+  main(process.argv.slice(2), process.env);
+}
+
+export default main;
