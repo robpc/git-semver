@@ -169,8 +169,8 @@ const gitSemver = async (
 ): Promise<string> => {
   const github = new Github(token, owner, repo);
 
-  const branchPriority = options.branches || [{ filter: ".*" }];
-  const tagPriority = options.tags || [{ filter: ".*" }];
+  const branchPriority = options.branches || [{ filter: ".*", sort: "desc" }];
+  const tagPriority = options.tags || [{ filter: ".*", sort: "semver" }];
 
   const branch = await findBranch(github, ref, branchPriority);
   const [tag, distance] = await findTag(github, ref, tagPriority);

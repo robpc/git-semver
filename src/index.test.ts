@@ -40,6 +40,7 @@ describe("gitSemver", () => {
   test("is just the tag when using tag commit", async () => {
     mockGithubRange.mockImplementation((from: string, to: string) => {
       if (to == "feature-four") return { status: "ahead", ahead_by: 2 };
+      if (to == "main") return { status: "ahead", ahead_by: 3 };
       if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
       if (from == "1.0.0") return { status: "identical", ahead_by: 0 };
       throw new Error(`Unaxpected params, from:${from} to:${to}`);
@@ -53,7 +54,7 @@ describe("gitSemver", () => {
   test("is incremented from tag", async () => {
     mockGithubRange.mockImplementation((from: string, to: string) => {
       if (to == "feature-four") return { status: "identical", ahead_by: 0 };
-      if (to == "main") return { status: "ahead", ahead_by: 1 };
+      if (to == "main") return { status: "diverged", ahead_by: 2 };
       if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
       if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
       throw new Error(`Unaxpected params, from:${from} to:${to}`);
@@ -67,7 +68,7 @@ describe("gitSemver", () => {
   test("uses increment", async () => {
     mockGithubRange.mockImplementation((from: string, to: string) => {
       if (to == "feature-four") return { status: "identical", ahead_by: 0 };
-      if (to == "main") return { status: "ahead", ahead_by: 1 };
+      if (to == "main") return { status: "diverged", ahead_by: 2 };
       if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
       if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
       throw new Error(`Unaxpected params, from:${from} to:${to}`);
@@ -101,7 +102,7 @@ describe("gitSemver", () => {
   test("uses prerelease", async () => {
     mockGithubRange.mockImplementation((from: string, to: string) => {
       if (to == "feature-four") return { status: "identical", ahead_by: 0 };
-      if (to == "main") return { status: "ahead", ahead_by: 1 };
+      if (to == "main") return { status: "diverged", ahead_by: 2 };
       if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
       if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
       throw new Error(`Unaxpected params, from:${from} to:${to}`);

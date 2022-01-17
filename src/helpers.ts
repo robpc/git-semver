@@ -36,12 +36,12 @@ const sortByRegexList = (
     if (sort != "none") {
       if (sort == "asc") {
         filtered.sort();
-      } else if (sort == "desc") {
-        filtered.sort().reverse();
-      } /*if (sort == "semver")*/ else {
+      } else if (sort == "semver") {
         filtered.sort((v1, v2) =>
           semverRcompare(gentleCoerce(v1), gentleCoerce(v2))
         );
+      } /* if (sort == "desc") */ else {
+        filtered.sort().reverse();
       }
     }
 

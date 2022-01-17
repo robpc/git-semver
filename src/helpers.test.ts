@@ -60,14 +60,14 @@ describe("sortByRegexList", () => {
   test("sorts filter", () => {
     expect(
       sortByRegexList(
-        ["main", "dev", "v1.0", "2.6"],
+        ["main", "dev", "bob", "tim"],
         [
           { filter: "(main|master)" },
           { filter: "dev(elop)?" },
           { filter: ".*" },
         ]
       )
-    ).toStrictEqual(["main", "dev", "2.6", "v1.0"]);
+    ).toStrictEqual(["main", "dev", "tim", "bob"]);
   });
 });
 

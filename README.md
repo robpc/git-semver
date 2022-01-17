@@ -23,9 +23,7 @@ Unlike other libraries this `git-semver` uses the Github API ([octokit.js](https
 
 _NOTE: This provides and MVP version of this utility, but still in initial development for experimentation_
 
-## Usage
-
-### Command Line
+## Command Line
 
 ```
 $ npx @robpc/git-semver --help
@@ -37,6 +35,7 @@ Arguments:
 
 Options:
   -i, --increment <increment>  version increment size (choices: "none", "patch", "minor", "major", default: "patch")
+  -b, --branch <filter...>     list of branch filters in priority order
   -h, --help                   display help for command
 ```
 
@@ -49,14 +48,21 @@ $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
 2.0.5-main.4
 ```
 
-Branches are prioritized based on the following:
+### Version Increment
 
-- `(main|master)`
-- `*v?\\d+(\\.\\d+)?(\\.\\d+)?`
+When a version is found, the version will be incremented to the next patch version, use the `-i, --increment` option to choose `none`, `patch`, `minor`, or `major` instead.
+
+### Branch Priority
+
+Branches are searched in the in the order below by default:
+
 - `release-.*`
 - `hotfix-.*`
+- `(main|master)`
 - `dev(elop)?`
 - `.*`
+
+Use the `-b, --branch` argument to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
 
 ### Github Actions
 
@@ -86,7 +92,7 @@ jobs:
       # ...
 ```
 
-### Module
+## Module
 
 _NOTE: More options are available using this as a library, but needs more documentation. See the example below._
 

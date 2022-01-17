@@ -47,6 +47,10 @@ const main = async (argv, env) => {
         .choices(["none", "patch", "minor", "major"])
         .default("patch")
     )
+    .option(
+      "-b, --branch <filter...>",
+      "list of branch filters in priority order"
+    )
     .parse(argv, { from: "user" });
 
   if (!argv.length) {
@@ -66,18 +70,26 @@ const main = async (argv, env) => {
   logger.info(`Name: ${name}`);
   logger.info(`Reference: ${reference}`);
 
-  const { increment } = program.opts();
+  const options = program.opts();
+  const { increment } = options;
 
-  const branches: BranchOptions[] = [
-    { filter: "(main|master)" },
-    { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?" },
-    { filter: "release-.*" },
-    { filter: "hotfix-.*" },
-    { filter: "dev(elop)?" },
-    { filter: ".*" },
+  const defaultBranchList: string[] = [
+    "release-.*",
+    "hotfix-.*",
+    "(main|master)",
+    "dev(elop)?",
+    ".*",
   ];
 
-  branches.forEach((item) => (item.increment = increment));
+  const branchOptions: string[] =
+    options.branch && options.branch.length > 0
+      ? options.branch
+      : defaultBranchList;
+
+  const branches: BranchOptions[] = branchOptions.map((filter) => ({
+    filter,
+    increment,
+  }));
 
   const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
     branches,

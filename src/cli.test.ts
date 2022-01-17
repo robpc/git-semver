@@ -98,10 +98,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
-      { filter: "(main|master)", increment: "patch" },
-      { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?", increment: "patch" },
       { filter: "release-.*", increment: "patch" },
       { filter: "hotfix-.*", increment: "patch" },
+      { filter: "(main|master)", increment: "patch" },
       { filter: "dev(elop)?", increment: "patch" },
       { filter: ".*", increment: "patch" },
     ];
@@ -128,10 +127,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
-      { filter: "(main|master)", increment: "none" },
-      { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?", increment: "none" },
       { filter: "release-.*", increment: "none" },
       { filter: "hotfix-.*", increment: "none" },
+      { filter: "(main|master)", increment: "none" },
       { filter: "dev(elop)?", increment: "none" },
       { filter: ".*", increment: "none" },
     ];
