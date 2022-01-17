@@ -30,13 +30,16 @@ $ npx @robpc/git-semver --help
 Usage: [options] <repository> <reference>
 
 Arguments:
-  repository                   github repository as <owner>/<name>
-  reference                    commit reference to version
+  repository                        github repository as <owner>/<name>
+  reference                         commit reference to version
 
 Options:
-  -i, --increment <increment>  version increment size (choices: "none", "patch", "minor", "major", default: "patch")
-  -b, --branchFilters <filter...>     list of branch filters in priority order
-  -h, --help                   display help for command
+  -i, --increment <increment>       version increment size
+                                    (choices: "none", "patch", "minor", "major", default: "patch")
+  -b, --branch-filters <filter...>  list of branch filters in priority order
+  -s, --sort <sort>                 sort method within branch filters
+                                    (choices: "asc", "desc", "semver", default: "desc")
+  -h, --help                        display help for command
 ```
 
 Requires a GitHub token in the env var `GITHUB_TOKEN`.
