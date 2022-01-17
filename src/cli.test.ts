@@ -98,11 +98,40 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
-      { filter: "release-.*", increment: "patch" },
-      { filter: "hotfix-.*", increment: "patch" },
-      { filter: "(main|master)", increment: "patch" },
-      { filter: "dev(elop)?", increment: "patch" },
-      { filter: ".*", increment: "patch" },
+      { filter: "release-.*", increment: "patch", sort: "desc" },
+      { filter: "hotfix-.*", increment: "patch", sort: "desc" },
+      { filter: "(main|master)", increment: "patch", sort: "desc" },
+      { filter: "dev(elop)?", increment: "patch", sort: "desc" },
+      { filter: ".*", increment: "patch", sort: "desc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses filter option", async () => {
+    await expect(
+      main(
+        ["owner/name", "reference", "-b", "(main|master)", "-b", "dev(elop)?"],
+        { GITHUB_TOKEN: "token" }
+      )
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "patch", sort: "desc" },
+      { filter: "dev(elop)?", increment: "patch", sort: "desc" },
     ];
 
     expect(mockGitSemver).toHaveBeenLastCalledWith(
@@ -127,11 +156,42 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
-      { filter: "release-.*", increment: "none" },
-      { filter: "hotfix-.*", increment: "none" },
-      { filter: "(main|master)", increment: "none" },
-      { filter: "dev(elop)?", increment: "none" },
-      { filter: ".*", increment: "none" },
+      { filter: "release-.*", increment: "none", sort: "desc" },
+      { filter: "hotfix-.*", increment: "none", sort: "desc" },
+      { filter: "(main|master)", increment: "none", sort: "desc" },
+      { filter: "dev(elop)?", increment: "none", sort: "desc" },
+      { filter: ".*", increment: "none", sort: "desc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses sort option", async () => {
+    await expect(
+      main(["owner/name", "reference", "-s", "semver"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "release-.*", increment: "patch", sort: "semver" },
+      { filter: "hotfix-.*", increment: "patch", sort: "semver" },
+      { filter: "(main|master)", increment: "patch", sort: "semver" },
+      { filter: "dev(elop)?", increment: "patch", sort: "semver" },
+      { filter: ".*", increment: "patch", sort: "semver" },
     ];
 
     expect(mockGitSemver).toHaveBeenLastCalledWith(

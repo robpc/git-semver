@@ -48,8 +48,13 @@ const main = async (argv, env) => {
         .default("patch")
     )
     .option(
-      "-b, --branch <filter...>",
+      "-b, --branch-filters <filter...>",
       "list of branch filters in priority order"
+    )
+    .addOption(
+      new Option("-s, --sort <sort>", "sort method within branch filters")
+        .choices(["asc", "desc", "semver"])
+        .default("desc")
     )
     .parse(argv, { from: "user" });
 
@@ -71,9 +76,9 @@ const main = async (argv, env) => {
   logger.info(`Reference: ${reference}`);
 
   const options = program.opts();
-  const { increment } = options;
+  const { increment, sort } = options;
 
-  const defaultBranchList: string[] = [
+  const defaultBranchFilters: string[] = [
     "release-.*",
     "hotfix-.*",
     "(main|master)",
@@ -81,14 +86,15 @@ const main = async (argv, env) => {
     ".*",
   ];
 
-  const branchOptions: string[] =
-    options.branch && options.branch.length > 0
-      ? options.branch
-      : defaultBranchList;
+  const branchFilters: string[] =
+    options.branchFilters && options.branchFilters.length > 0
+      ? options.branchFilters
+      : defaultBranchFilters;
 
-  const branches: BranchOptions[] = branchOptions.map((filter) => ({
+  const branches: BranchOptions[] = branchFilters.map((filter) => ({
     filter,
     increment,
+    sort,
   }));
 
   const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {

@@ -35,7 +35,7 @@ Arguments:
 
 Options:
   -i, --increment <increment>  version increment size (choices: "none", "patch", "minor", "major", default: "patch")
-  -b, --branch <filter...>     list of branch filters in priority order
+  -b, --branchFilters <filter...>     list of branch filters in priority order
   -h, --help                   display help for command
 ```
 
@@ -48,13 +48,13 @@ $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
 2.0.5-main.4
 ```
 
-### Version Increment
+### Increment
 
 When a version is found, the version will be incremented to the next patch version, use the `-i, --increment` option to choose `none`, `patch`, `minor`, or `major` instead.
 
 ### Branch Priority
 
-Branches are searched in the in the order below by default:
+Branches are searched in the order below by default:
 
 - `release-.*`
 - `hotfix-.*`
@@ -62,7 +62,9 @@ Branches are searched in the in the order below by default:
 - `dev(elop)?`
 - `.*`
 
-Use the `-b, --branch` argument to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
+Use the `-b, --branchFilters` argument to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
+
+Use the `-s, --sort` option to provide and alternative method for sorting branches that match a particular filter. The default is `desc` which sorts reverse alphabetically, but the options are `asc`, `desc`, and `semver`.
 
 ### Github Actions
 
