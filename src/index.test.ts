@@ -64,6 +64,40 @@ describe("gitSemver", () => {
     ).resolves.toBe("1.0.1-feature-four.2");
   });
 
+  test("uses increment", async () => {
+    mockGithubRange.mockImplementation((from: string, to: string) => {
+      if (to == "feature-four") return { status: "identical", ahead_by: 0 };
+      if (to == "main") return { status: "ahead", ahead_by: 1 };
+      if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
+      if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
+
+    await expect(
+      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: ".*", increment: "none" }],
+      })
+    ).resolves.toBe("1.0.0-feature-four.2");
+
+    await expect(
+      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: ".*", increment: "patch" }],
+      })
+    ).resolves.toBe("1.0.1-feature-four.2");
+
+    await expect(
+      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: ".*", increment: "minor" }],
+      })
+    ).resolves.toBe("1.1.0-feature-four.2");
+
+    await expect(
+      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: ".*", increment: "major" }],
+      })
+    ).resolves.toBe("2.0.0-feature-four.2");
+  });
+
   test("uses prerelease", async () => {
     mockGithubRange.mockImplementation((from: string, to: string) => {
       if (to == "feature-four") return { status: "identical", ahead_by: 0 };

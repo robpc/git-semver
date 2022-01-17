@@ -27,11 +27,27 @@ _NOTE: This provides and MVP version of this utility, but still in initial devel
 
 ### Command Line
 
-```bash
-$ npx @robpc/git-semver {repository} {ref}
+```
+$ npx @robpc/git-semver --help
+Usage: [options] <repository> <reference>
+
+Arguments:
+  repository                   github repository as <owner>/<name>
+  reference                    commit reference to version
+
+Options:
+  -i, --increment <increment>  version increment size (choices: "none", "patch", "minor", "major", default: "patch")
+  -h, --help                   display help for command
 ```
 
 Requires a GitHub token in the env var `GITHUB_TOKEN`.
+
+_example_
+
+```bash
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
+2.0.5-main.4
+```
 
 Branches are prioritized based on the following:
 
@@ -41,13 +57,6 @@ Branches are prioritized based on the following:
 - `hotfix-.*`
 - `dev(elop)?`
 - `.*`
-
-_example_
-
-```bash
-$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
-2.0.5-main.4
-```
 
 ### Github Actions
 
@@ -89,8 +98,8 @@ import gitSemver from "@robpc/git-semver";
 const token = process.env.GITHUB_TOKEN;
 
 const branches: BranchOptions[] = [
-  { filter: "(main|master)", prerelease: "rc" },
-  { filter: "hotfix-.*", sort: "asc" },
+  { filter: "(main|master)", prerelease: "rc", increment: "minor" },
+  { filter: "hotfix-.*", sort: "asc", increment: "patch" },
   { filter: "dev(elop)?", prerelease: "beta" },
   { filter: ".*" },
 ];

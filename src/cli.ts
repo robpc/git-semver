@@ -14,7 +14,7 @@
  * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
  * OR PERFORMANCE OF THIS SOFTWARE.
  */
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import LoggerFactory from "@robpc/logger";
 
 import gitSemver from "./index";
@@ -42,6 +42,11 @@ const main = async (argv, env) => {
   program
     .argument("<repository>", "github repository as <owner>/<name>")
     .argument("<reference>", "commit reference to version")
+    .addOption(
+      new Option("-i, --increment <increment>", "version increment size")
+        .choices(["none", "patch", "minor", "major"])
+        .default("patch")
+    )
     .parse(argv, { from: "user" });
 
   if (!argv.length) {
@@ -61,6 +66,8 @@ const main = async (argv, env) => {
   logger.info(`Name: ${name}`);
   logger.info(`Reference: ${reference}`);
 
+  const { increment } = program.opts();
+
   const branches: BranchOptions[] = [
     { filter: "(main|master)" },
     { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?" },
@@ -69,6 +76,8 @@ const main = async (argv, env) => {
     { filter: "dev(elop)?" },
     { filter: ".*" },
   ];
+
+  branches.forEach((item) => (item.increment = increment));
 
   const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
     branches,

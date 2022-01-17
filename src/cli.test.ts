@@ -27,15 +27,18 @@ afterAll(() => {
   mockExit.mockRestore();
   mockStderr.mockRestore();
   mockConsoleLog.mockRestore();
+  mockGitSemver.mockRestore();
 });
 
 afterEach(() => {
   mockExit.mockClear();
   mockStderr.mockClear();
   mockConsoleLog.mockClear();
+  mockGitSemver.mockClear();
 });
 
 import main from "./cli";
+import { BranchOptions } from "./types";
 
 describe("main", () => {
   test("requires token in env", async () => {
@@ -44,6 +47,7 @@ describe("main", () => {
       "error: missing 'GITHUB_TOKEN' in environment variables\n"
     );
   });
+
   test("requires repository in arguments", async () => {
     await expect(main([], { GITHUB_TOKEN: "token" })).rejects.toThrow(
       "exit: 1"
@@ -52,6 +56,7 @@ describe("main", () => {
       "error: missing required argument 'repository'\n"
     );
   });
+
   test("requires reference in arguments", async () => {
     await expect(
       main(["repository"], { GITHUB_TOKEN: "token" })
@@ -60,6 +65,7 @@ describe("main", () => {
       "error: missing required argument 'reference'\n"
     );
   });
+
   test("requires repository in proper format", async () => {
     const formatError = "error: format for 'repository' is <owner>/<name>\n";
     const env = { GITHUB_TOKEN: "token" };
@@ -82,6 +88,7 @@ describe("main", () => {
     expect(mockStderr).toHaveBeenCalledWith(formatError);
     mockStderr.mockClear();
   });
+
   test("calls gitSemver", async () => {
     await expect(main(["owner/name", "reference"], { GITHUB_TOKEN: "token" }))
       .resolves;
@@ -89,6 +96,53 @@ describe("main", () => {
     expect(mockExit).toHaveBeenCalledTimes(0);
 
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "patch" },
+      { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?", increment: "patch" },
+      { filter: "release-.*", increment: "patch" },
+      { filter: "hotfix-.*", increment: "patch" },
+      { filter: "dev(elop)?", increment: "patch" },
+      { filter: ".*", increment: "patch" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses increment option", async () => {
+    await expect(
+      main(["owner/name", "reference", "-i", "none"], { GITHUB_TOKEN: "token" })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "none" },
+      { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?", increment: "none" },
+      { filter: "release-.*", increment: "none" },
+      { filter: "hotfix-.*", increment: "none" },
+      { filter: "dev(elop)?", increment: "none" },
+      { filter: ".*", increment: "none" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches }
+    );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");

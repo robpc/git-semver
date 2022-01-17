@@ -152,33 +152,6 @@ const genVersion = (
 };
 
 /**
- * Historical version that is technically not semver
- *
- * @param owner Github owner
- * @param repo  Github repo name
- * @param ref git reference to version
- * @param options
- * @returns version as a string
- */
-const robVersion = async (
-  token: string,
-  owner: string,
-  repo: string,
-  ref: string,
-  options: TagVersionOptions
-): Promise<string> => {
-  const github = new Github(token, owner, repo);
-
-  const branchPriority = options.branches || [{ filter: ".*" }];
-  const tagPriority = options.tags || [{ filter: ".*" }];
-
-  const branch = await findBranch(github, ref, branchPriority);
-  const [tag, distance] = await findTag(github, ref, tagPriority);
-
-  return genVersion(tag, sanitizePrerelease(branch), distance, "none");
-};
-
-/**
  * Generates a deterministic semver of the github reference
  *
  * @param owner Github owner
@@ -218,4 +191,4 @@ const gitSemver = async (
 };
 
 export default gitSemver;
-export { robVersion, gitDescribe };
+export { gitDescribe };
