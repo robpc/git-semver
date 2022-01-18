@@ -81,9 +81,9 @@ const main = async (argv, env) => {
   logger.debug(options);
 
   const defaultBranchFilters: string[] = [
+    "(main|master)",
     "release-.*",
     "hotfix-.*",
-    "(main|master)",
     "dev(elop)?",
     ".*",
   ];

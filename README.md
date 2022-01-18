@@ -25,6 +25,15 @@ _NOTE: This provides and MVP version of this utility, but still in initial devel
 
 ## Command Line
 
+_example_
+
+```bash
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
+2.0.5-main.4
+```
+
+Requires a GitHub token in the env var `GITHUB_TOKEN`.
+
 ```
 $ npx @robpc/git-semver --help
 Usage: [options] <repository> <reference>
@@ -43,26 +52,26 @@ Options:
   -h, --help                        display help for command
 ```
 
-Requires a GitHub token in the env var `GITHUB_TOKEN`.
+### Options
+
+#### Increment
+
+When a version is found, the version will be incremented to the next patch version, use the `-i, --increment` option to choose `none`, `patch`, `minor`, or `major` instead.
 
 _example_
 
 ```bash
-$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1
-2.0.5-main.4
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -i major
+3.0.0-main.4
 ```
 
-### Increment
-
-When a version is found, the version will be incremented to the next patch version, use the `-i, --increment` option to choose `none`, `patch`, `minor`, or `major` instead.
-
-### Branch Priority
+#### Branch Priority
 
 Branches are searched in the order below by default:
 
+- `(main|master)`
 - `release-.*`
 - `hotfix-.*`
-- `(main|master)`
 - `dev(elop)?`
 - `.*`
 
@@ -70,9 +79,9 @@ Use `-b, --branch-filters` options to supply a custom ordered list of filters. `
 
 Use the `-s, --sort` option to provide and alternative method for sorting branches that match a particular filter. The default is `desc` which sorts reverse alphabetically, but the options are `asc`, `desc`, and `semver`.
 
-### Build Metadata
+#### Build Metadata
 
-In semver, the [build metadata](https://semver.org/#spec-item-10) is useful for identiftying the commit used in the build but does not affect the version.
+In semver, the [build metadata](https://semver.org/#spec-item-10) is useful for adding info about the build but does not affect the version.
 
 Use `-g, --add-build-sha` to add the short hash to the build metadata.
 

@@ -100,9 +100,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "patch", sort: "desc" },
       { filter: "release-.*", increment: "patch", sort: "desc" },
       { filter: "hotfix-.*", increment: "patch", sort: "desc" },
-      { filter: "(main|master)", increment: "patch", sort: "desc" },
       { filter: "dev(elop)?", increment: "patch", sort: "desc" },
       { filter: ".*", increment: "patch", sort: "desc" },
     ];
@@ -119,7 +119,7 @@ describe("main", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
   });
 
-  test("uses filter option", async () => {
+  test("uses branch filter option", async () => {
     await expect(
       main(
         ["owner/name", "reference", "-b", "(main|master)", "-b", "dev(elop)?"],
@@ -158,9 +158,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "none", sort: "desc" },
       { filter: "release-.*", increment: "none", sort: "desc" },
       { filter: "hotfix-.*", increment: "none", sort: "desc" },
-      { filter: "(main|master)", increment: "none", sort: "desc" },
       { filter: "dev(elop)?", increment: "none", sort: "desc" },
       { filter: ".*", increment: "none", sort: "desc" },
     ];
@@ -177,7 +177,7 @@ describe("main", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
   });
 
-  test("uses sort option", async () => {
+  test("uses branch sort option", async () => {
     await expect(
       main(["owner/name", "reference", "-s", "semver"], {
         GITHUB_TOKEN: "token",
@@ -189,9 +189,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "patch", sort: "semver" },
       { filter: "release-.*", increment: "patch", sort: "semver" },
       { filter: "hotfix-.*", increment: "patch", sort: "semver" },
-      { filter: "(main|master)", increment: "patch", sort: "semver" },
       { filter: "dev(elop)?", increment: "patch", sort: "semver" },
       { filter: ".*", increment: "patch", sort: "semver" },
     ];
@@ -220,9 +220,9 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
+      { filter: "(main|master)", increment: "patch", sort: "desc" },
       { filter: "release-.*", increment: "patch", sort: "desc" },
       { filter: "hotfix-.*", increment: "patch", sort: "desc" },
-      { filter: "(main|master)", increment: "patch", sort: "desc" },
       { filter: "dev(elop)?", increment: "patch", sort: "desc" },
       { filter: ".*", increment: "patch", sort: "desc" },
     ];
