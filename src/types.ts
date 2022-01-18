@@ -31,4 +31,7 @@ export interface TagOptions {
 export interface TagVersionOptions {
   branches?: Array<BranchOptions>;
   tags?: Array<TagOptions>;
+  metadata?: {
+    sha?: boolean;
+  };
 }

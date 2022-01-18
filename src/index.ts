@@ -126,7 +126,7 @@ const gitDescribe = async (
   const sha = await github.sha(ref);
   logger.trace("sha", sha);
 
-  const short_hash = sha.substr(0, 10);
+  const short_hash = sha.substring(0, 7);
 
   const describe = distance > 0 ? `${tag}-${distance}-g${short_hash}` : tag;
 
@@ -137,7 +137,8 @@ const genVersion = (
   base: string,
   prerelease: string,
   distance: number,
-  increment: IncrementOptions = "patch"
+  increment: IncrementOptions = "patch",
+  metadata: string[] = undefined
 ): string => {
   let baseVersion = gentleCoerce(base);
 
@@ -145,7 +146,10 @@ const genVersion = (
     baseVersion =
       increment == "none" ? baseVersion : semverInc(baseVersion, increment);
 
-    return `${baseVersion}-${prerelease}.${distance}`;
+    const build =
+      metadata && metadata.length > 0 ? `+${metadata.join(".")}` : "";
+
+    return `${baseVersion}-${prerelease}.${distance}${build}`;
   }
 
   return baseVersion;
@@ -187,7 +191,17 @@ const gitSemver = async (
   const increment =
     branchOption && branchOption.increment ? branchOption.increment : "patch";
 
-  return genVersion(tag, prerelease, distance, increment);
+  const metadata = [];
+
+  if (options.metadata && options.metadata.sha) {
+    const sha = await github.sha(ref);
+    logger.trace("sha", sha);
+
+    const shortHash = sha.substring(0, 7);
+    metadata.push(shortHash);
+  }
+
+  return genVersion(tag, prerelease, distance, increment, metadata);
 };
 
 export default gitSemver;

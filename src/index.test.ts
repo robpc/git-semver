@@ -18,12 +18,14 @@ import gitSemver from "./index";
 const mockGithubBranches = jest.fn();
 const mockGithubTags = jest.fn();
 const mockGithubRange = jest.fn();
+const mockGithubSha = jest.fn();
 
 jest.mock("./github", () =>
   jest.fn(() => ({
     branches: mockGithubBranches,
     tags: mockGithubTags,
     range: mockGithubRange,
+    sha: mockGithubSha,
   }))
 );
 
@@ -35,6 +37,7 @@ describe("gitSemver", () => {
     mockGithubBranches.mockClear();
     mockGithubTags.mockClear();
     mockGithubRange.mockClear();
+    mockGithubSha.mockClear();
   });
 
   test("is just the tag when using tag commit", async () => {
@@ -113,5 +116,26 @@ describe("gitSemver", () => {
         branches: [{ filter: "feature-.*", prerelease: "beta" }],
       })
     ).resolves.toBe("1.0.1-beta.2");
+  });
+
+  test("uses sha metadata", async () => {
+    mockGithubRange.mockImplementation((from: string, to: string) => {
+      if (to == "feature-four") return { status: "identical", ahead_by: 0 };
+      if (to == "main") return { status: "diverged", ahead_by: 2 };
+      if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
+      if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
+
+    mockGithubSha.mockImplementation(() => "ddf0a84-43524543554252543");
+
+    await expect(
+      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
+        branches: [{ filter: "feature-four" }],
+        metadata: {
+          sha: true,
+        },
+      })
+    ).resolves.toBe("1.0.1-feature-four.2+ddf0a84");
   });
 });

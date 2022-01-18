@@ -56,6 +56,7 @@ const main = async (argv, env) => {
         .choices(["asc", "desc", "semver"])
         .default("desc")
     )
+    .option("-g, --add-build-sha", "add git sha to the build metadata")
     .parse(argv, { from: "user" });
 
   if (!argv.length) {
@@ -76,7 +77,8 @@ const main = async (argv, env) => {
   logger.info(`Reference: ${reference}`);
 
   const options = program.opts();
-  const { increment, sort } = options;
+  const { increment, sort, addBuildSha } = options;
+  logger.debug(options);
 
   const defaultBranchFilters: string[] = [
     "release-.*",
@@ -99,6 +101,9 @@ const main = async (argv, env) => {
 
   const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
     branches,
+    metadata: {
+      sha: addBuildSha,
+    },
   });
 
   console.log(version);

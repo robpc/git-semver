@@ -39,6 +39,7 @@ Options:
   -b, --branch-filters <filter...>  list of branch filters in priority order
   -s, --sort <sort>                 sort method within branch filters
                                     (choices: "asc", "desc", "semver", default: "desc")
+  -g, --add-build-sha               add git sha to the build metadata
   -h, --help                        display help for command
 ```
 
@@ -65,9 +66,22 @@ Branches are searched in the order below by default:
 - `dev(elop)?`
 - `.*`
 
-Use the `-b, --branchFilters` argument to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
+Use `-b, --branch-filters` options to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
 
 Use the `-s, --sort` option to provide and alternative method for sorting branches that match a particular filter. The default is `desc` which sorts reverse alphabetically, but the options are `asc`, `desc`, and `semver`.
+
+### Build Metadata
+
+In semver, the [build metadata](https://semver.org/#spec-item-10) is useful for identiftying the commit used in the build but does not affect the version.
+
+Use `-g, --add-build-sha` to add the short hash to the build metadata.
+
+_example_
+
+```bash
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -g
+2.0.5-main.4+24cbac1
+```
 
 ### Github Actions
 

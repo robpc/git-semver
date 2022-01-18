@@ -89,6 +89,8 @@ describe("main", () => {
     mockStderr.mockClear();
   });
 
+  const metadata = { sha: undefined };
+
   test("calls gitSemver", async () => {
     await expect(main(["owner/name", "reference"], { GITHUB_TOKEN: "token" }))
       .resolves;
@@ -110,7 +112,7 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches }
+      { branches, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -139,7 +141,7 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches }
+      { branches, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -168,7 +170,7 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches }
+      { branches, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -199,7 +201,38 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches }
+      { branches, metadata }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses metadata sha option", async () => {
+    await expect(
+      main(["owner/name", "reference", "-g"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "release-.*", increment: "patch", sort: "desc" },
+      { filter: "hotfix-.*", increment: "patch", sort: "desc" },
+      { filter: "(main|master)", increment: "patch", sort: "desc" },
+      { filter: "dev(elop)?", increment: "patch", sort: "desc" },
+      { filter: ".*", increment: "patch", sort: "desc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches, metadata: { sha: true } }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
