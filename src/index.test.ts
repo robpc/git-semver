@@ -29,6 +29,9 @@ jest.mock("./github", () =>
   }))
 );
 
+const mockDayjsFormat = jest.fn(() => "date");
+jest.mock("dayjs", () => jest.fn(() => ({ format: mockDayjsFormat })));
+
 describe("gitSemver", () => {
   mockGithubBranches.mockReturnValue(Promise.resolve(["feature-four", "main"]));
   mockGithubTags.mockReturnValue(Promise.resolve(["1.1.0", "1.0.0"]));
@@ -118,11 +121,11 @@ describe("gitSemver", () => {
     ).resolves.toBe("1.0.1-beta.2");
   });
 
-  test("uses sha metadata", async () => {
+  test("uses build sha", async () => {
+    mockGithubBranches.mockReturnValue(Promise.resolve(["main"]));
+    mockGithubTags.mockReturnValue(Promise.resolve(["1.0.0"]));
     mockGithubRange.mockImplementation((from: string, to: string) => {
-      if (to == "feature-four") return { status: "identical", ahead_by: 0 };
-      if (to == "main") return { status: "diverged", ahead_by: 2 };
-      if (from == "1.1.0") return { status: "behind", ahead_by: 0 };
+      if (to == "main") return { status: "ahead", ahead_by: 2 };
       if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
       throw new Error(`Unaxpected params, from:${from} to:${to}`);
     });
@@ -130,12 +133,48 @@ describe("gitSemver", () => {
     mockGithubSha.mockImplementation(() => "ddf0a84-43524543554252543");
 
     await expect(
-      gitSemver("token", "robpc", "git-version-tests-alpha", "ddf0a84", {
-        branches: [{ filter: "feature-four" }],
+      gitSemver("token", "robpc", "alpha", "ddf0a84", {
+        branches: [{ filter: "main" }],
         metadata: {
           sha: true,
         },
       })
-    ).resolves.toBe("1.0.1-feature-four.2+ddf0a84");
+    ).resolves.toBe("1.0.1-main.2+ddf0a84");
+  });
+
+  test("uses build date", async () => {
+    mockGithubBranches.mockReturnValue(Promise.resolve(["main"]));
+    mockGithubTags.mockReturnValue(Promise.resolve(["1.0.0"]));
+    mockGithubRange.mockImplementation((from: string, to: string) => {
+      if (to == "main") return { status: "ahead", ahead_by: 2 };
+      if (from == "1.0.0") return { status: "ahead", ahead_by: 2 };
+      throw new Error(`Unaxpected params, from:${from} to:${to}`);
+    });
+
+    // mockGithubSha.mockImplementation(() => "ddf0a84-43524543554252543");
+
+    await expect(
+      gitSemver("token", "robpc", "alpha", "ddf0a84", {
+        branches: [{ filter: "main" }],
+        metadata: {
+          date: true,
+        },
+      })
+    ).resolves.toBe("1.0.1-main.2+date");
+
+    expect(mockDayjsFormat).toHaveBeenCalledTimes(1);
+    expect(mockDayjsFormat).toHaveBeenCalledWith("YYYYMMDD-HHmmss");
+
+    await expect(
+      gitSemver("token", "robpc", "alpha", "ddf0a84", {
+        branches: [{ filter: "main" }],
+        metadata: {
+          date: "YYMM",
+        },
+      })
+    ).resolves.toBe("1.0.1-main.2+date");
+
+    expect(mockDayjsFormat).toHaveBeenCalledTimes(2);
+    expect(mockDayjsFormat).toHaveBeenCalledWith("YYMM");
   });
 });

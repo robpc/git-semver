@@ -33,5 +33,6 @@ export interface TagVersionOptions {
   tags?: Array<TagOptions>;
   metadata?: {
     sha?: boolean;
+    date?: boolean | string;
   };
 }

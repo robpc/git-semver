@@ -210,7 +210,7 @@ describe("main", () => {
 
   test("uses metadata sha option", async () => {
     await expect(
-      main(["owner/name", "reference", "-g"], {
+      main(["owner/name", "reference", "-b", "main", "-g"], {
         GITHUB_TOKEN: "token",
       })
     ).resolves;
@@ -220,11 +220,7 @@ describe("main", () => {
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
     const branches: BranchOptions[] = [
-      { filter: "(main|master)", increment: "patch", sort: "desc" },
-      { filter: "release-.*", increment: "patch", sort: "desc" },
-      { filter: "hotfix-.*", increment: "patch", sort: "desc" },
-      { filter: "dev(elop)?", increment: "patch", sort: "desc" },
-      { filter: ".*", increment: "patch", sort: "desc" },
+      { filter: "main", increment: "patch", sort: "desc" },
     ];
 
     expect(mockGitSemver).toHaveBeenLastCalledWith(
@@ -233,6 +229,60 @@ describe("main", () => {
       "name",
       "reference",
       { branches, metadata: { sha: true } }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses build date option", async () => {
+    await expect(
+      main(["owner/name", "reference", "-b", "main", "-d"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "main", increment: "patch", sort: "desc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches, metadata: { date: true } }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses build date option with format", async () => {
+    await expect(
+      main(["owner/name", "reference", "-b", "main", "-d", "YYMM"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const branches: BranchOptions[] = [
+      { filter: "main", increment: "patch", sort: "desc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches, metadata: { date: "YYMM" } }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);

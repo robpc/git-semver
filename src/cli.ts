@@ -57,6 +57,10 @@ const main = async (argv, env) => {
         .default("desc")
     )
     .option("-g, --add-build-sha", "add git sha to the build metadata")
+    .option(
+      "-d, --add-build-date [date-format]",
+      "add date to the build metadata, defaults to 'YYYYMMDD-HHmmss' if no format is supplied"
+    )
     .parse(argv, { from: "user" });
 
   if (!argv.length) {
@@ -77,7 +81,7 @@ const main = async (argv, env) => {
   logger.info(`Reference: ${reference}`);
 
   const options = program.opts();
-  const { increment, sort, addBuildSha } = options;
+  const { increment, sort, addBuildSha, addBuildDate } = options;
   logger.debug(options);
 
   const defaultBranchFilters: string[] = [
@@ -103,6 +107,7 @@ const main = async (argv, env) => {
     branches,
     metadata: {
       sha: addBuildSha,
+      date: addBuildDate,
     },
   });
 

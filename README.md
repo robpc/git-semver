@@ -39,17 +39,19 @@ $ npx @robpc/git-semver --help
 Usage: [options] <repository> <reference>
 
 Arguments:
-  repository                        github repository as <owner>/<name>
-  reference                         commit reference to version
+  repository                          github repository as <owner>/<name>
+  reference                           commit reference to version
 
 Options:
-  -i, --increment <increment>       version increment size
-                                    (choices: "none", "patch", "minor", "major", default: "patch")
-  -b, --branch-filters <filter...>  list of branch filters in priority order
-  -s, --sort <sort>                 sort method within branch filters
-                                    (choices: "asc", "desc", "semver", default: "desc")
-  -g, --add-build-sha               add git sha to the build metadata
-  -h, --help                        display help for command
+  -i, --increment <increment>         version increment size
+                                      (choices: "none", "patch", "minor", "major", default: "patch")
+  -b, --branch-filters <filter...>    list of branch filters in priority order
+  -s, --sort <sort>                   sort method within branch filters
+                                      (choices: "asc", "desc", "semver", default: "desc")
+  -g, --add-build-sha                 add git sha to the build metadata
+  -d, --add-build-date [date-format]  add date to the build metadata, defaults to 'YYYYMMDD-HHmmss' if
+                                      no format is supplied
+  -h, --help                          display help for command
 ```
 
 ### Options
@@ -90,6 +92,18 @@ _example_
 ```bash
 $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -g
 2.0.5-main.4+24cbac1
+```
+
+Use `-d, --add-build-date [format]` to add a date string to the build metadata. If the option is used, but no format is supplied, the default format of `YYYYMMDD-HHmmss` will be used. The format string can be anything valid for `dayjs().format("")` in the [dayjs library](https://day.js.org/docs/en/display/format) used to format the date. \_Note: To maintain `semver` compatibility, only use `[0-9a-zA-Z-]` characters per the [semver documentation](https://semver.org/#spec-item-10).
+
+_examples_
+
+```bash
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -d
+2.0.5-main.4+20220118-210623
+
+$ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -d 'YYYY-MM-DD.HHmma'
+2.0.5-main.4+2022-01-18.2106pm
 ```
 
 ### Github Actions

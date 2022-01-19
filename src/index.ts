@@ -15,6 +15,7 @@
  */
 import LoggerFactory from "@robpc/logger";
 import semverInc from "semver/functions/inc.js";
+import dayjs from "dayjs";
 
 import Github from "./github";
 
@@ -192,6 +193,16 @@ const gitSemver = async (
     branchOption && branchOption.increment ? branchOption.increment : "patch";
 
   const metadata = [];
+
+  if (options.metadata && options.metadata.date) {
+    const dateFormat =
+      typeof options.metadata.date == "string"
+        ? options.metadata.date
+        : "YYYYMMDD-HHmmss";
+
+    const dateStr = dayjs().format(dateFormat);
+    metadata.push(dateStr);
+  }
 
   if (options.metadata && options.metadata.sha) {
     const sha = await github.sha(ref);
