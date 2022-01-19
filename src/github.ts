@@ -30,14 +30,13 @@ class Github {
     this.repo = repo;
   }
 
-  branches = async () => {
-    const { data: branches } = await this.octokit.rest.repos.listBranches({
-      owner: this.owner,
-      repo: this.repo,
-    });
-
-    return branches.map(({ name }) => name);
-  };
+  branches = async () =>
+    this.octokit
+      .paginate(this.octokit.rest.repos.listBranches, {
+        owner: this.owner,
+        repo: this.repo,
+      })
+      .then((branches) => branches.map(({ name }) => name));
 
   tags = async () =>
     this.octokit
