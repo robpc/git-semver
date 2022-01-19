@@ -46,11 +46,14 @@ Options:
   -i, --increment <increment>         version increment size
                                       (choices: "none", "patch", "minor", "major", default: "patch")
   -b, --branch-filters <filter...>    list of branch filters in priority order
-  -s, --sort <sort>                   sort method within branch filters
-                                      (choices: "asc", "desc", "semver", default: "desc")
-  -g, --add-build-sha                 add git sha to the build metadata
+  -t, --tag-filters <filter...>       list of tag filters in priority order
+  -s, --add-build-sha                 add git sha to the build metadata
   -d, --add-build-date [date-format]  add date to the build metadata, defaults to 'YYYYMMDD-HHmmss' if
                                       no format is supplied
+  --branch-sort <sort>                sort method within branch filters
+                                      (choices: "asc", "desc", "semver", default: "desc")
+  --tag-sort <sort>                   sort method within tag filters
+                                      (choices: "asc", "desc", "semver", default: "semver")
   -h, --help                          display help for command
 ```
 
@@ -67,25 +70,11 @@ $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -i major
 3.0.0-main.4
 ```
 
-#### Branch Priority
-
-Branches are searched in the order below by default:
-
-- `(main|master)`
-- `release-.*`
-- `hotfix-.*`
-- `dev(elop)?`
-- `.*`
-
-Use `-b, --branch-filters` options to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
-
-Use the `-s, --sort` option to provide and alternative method for sorting branches that match a particular filter. The default is `desc` which sorts reverse alphabetically, but the options are `asc`, `desc`, and `semver`.
-
 #### Build Metadata
 
 In semver, the [build metadata](https://semver.org/#spec-item-10) is useful for adding info about the build but does not affect the version.
 
-Use `-g, --add-build-sha` to add the short hash to the build metadata.
+Use `-s, --add-build-sha` to add the short hash to the build metadata.
 
 _example_
 
@@ -105,6 +94,31 @@ $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -d
 $ GITHUB_TOKEN=... npx @robpc/git-semver robpc/config 24cbac1 -d 'YYYY-MM-DD.HHmma'
 2.0.5-main.4+2022-01-18.2106pm
 ```
+
+#### Branch Priority
+
+Branches are searched in the order below by default:
+
+- `(main|master)`
+- `release-.*`
+- `hotfix-.*`
+- `dev(elop)?`
+- `.*`
+
+Use `-b, --branch-filters` options to supply a custom ordered list of filters. `git-semver` will look for branch that has the reference as a ancestor in the order dictated by the filter list. This is useful in situtation where a commit is the ancestor of multiple branches (ie after a merge). In that case, one can prioritize the `main` branch over a feature branch. When multiple branches match a filter they will be done in reverse alphabetical order.
+
+Use the `--branch-sort` option to provide and alternative method for sorting branches that match a particular filter. The default is `desc` which sorts reverse alphabetically, but the options are `asc`, `desc`, and `semver`.
+
+#### Tag Priority
+
+Tags are searched in the order below by default:
+
+- `v?\\d+(\\.\\d+)?(\\.\\d+)?(-.*)?`
+- `.*`
+
+Use `-t, --tag-filters` options to supply a custom ordered list of filters. `git-semver` will look for a tag that is the ancestor of the reference in the order dictated by the filter list. When multiple tags match a filter they will be done in semver order.
+
+Use the `--tag-sort` option to provide and alternative method for sorting tags that match a particular filter. The default is `semver` which sorts according to sever rules, but the options are `asc`, `desc`, and `semver`.
 
 ### Github Actions
 

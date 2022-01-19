@@ -18,7 +18,7 @@ import { Command, Option } from "commander";
 import LoggerFactory from "@robpc/logger";
 
 import gitSemver from "./index";
-import { BranchOptions } from "./types";
+import { BranchOptions, TagOptions } from "./types";
 
 LoggerFactory.setStderrOutput(true);
 
@@ -51,15 +51,24 @@ const main = async (argv, env) => {
       "-b, --branch-filters <filter...>",
       "list of branch filters in priority order"
     )
-    .addOption(
-      new Option("-s, --sort <sort>", "sort method within branch filters")
-        .choices(["asc", "desc", "semver"])
-        .default("desc")
+    .option(
+      "-t, --tag-filters <filter...>",
+      "list of tag filters in priority order"
     )
-    .option("-g, --add-build-sha", "add git sha to the build metadata")
+    .option("-s, --add-build-sha", "add git sha to the build metadata")
     .option(
       "-d, --add-build-date [date-format]",
       "add date to the build metadata, defaults to 'YYYYMMDD-HHmmss' if no format is supplied"
+    )
+    .addOption(
+      new Option("--branch-sort <sort>", "sort method within branch filters")
+        .choices(["asc", "desc", "semver"])
+        .default("desc")
+    )
+    .addOption(
+      new Option("--tag-sort <sort>", "sort method within tag filters")
+        .choices(["asc", "desc", "semver"])
+        .default("semver")
     )
     .parse(argv, { from: "user" });
 
@@ -81,7 +90,7 @@ const main = async (argv, env) => {
   logger.info(`Reference: ${reference}`);
 
   const options = program.opts();
-  const { increment, sort, addBuildSha, addBuildDate } = options;
+  const { increment, branchSort, tagSort, addBuildSha, addBuildDate } = options;
   logger.debug(options);
 
   const defaultBranchFilters: string[] = [
@@ -100,11 +109,27 @@ const main = async (argv, env) => {
   const branches: BranchOptions[] = branchFilters.map((filter) => ({
     filter,
     increment,
-    sort,
+    sort: branchSort,
+  }));
+
+  const defaultTagFilters: string[] = [
+    "v?\\d+(\\.\\d+)?(\\.\\d+)?(-.*)?",
+    ".*",
+  ];
+
+  const tagFilters: string[] =
+    options.tagFilters && options.tagFilters.length > 0
+      ? options.tagFilters
+      : defaultTagFilters;
+
+  const tags: TagOptions[] = tagFilters.map((filter) => ({
+    filter,
+    sort: tagSort,
   }));
 
   const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
     branches,
+    tags,
     metadata: {
       sha: addBuildSha,
       date: addBuildDate,

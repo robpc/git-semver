@@ -38,7 +38,7 @@ afterEach(() => {
 });
 
 import main from "./cli";
-import { BranchOptions } from "./types";
+import { BranchOptions, TagOptions } from "./types";
 
 describe("main", () => {
   test("requires token in env", async () => {
@@ -89,7 +89,18 @@ describe("main", () => {
     mockStderr.mockClear();
   });
 
-  const metadata = { sha: undefined };
+  const branches: BranchOptions[] = [
+    { filter: "(main|master)", increment: "patch", sort: "desc" },
+    { filter: "release-.*", increment: "patch", sort: "desc" },
+    { filter: "hotfix-.*", increment: "patch", sort: "desc" },
+    { filter: "dev(elop)?", increment: "patch", sort: "desc" },
+    { filter: ".*", increment: "patch", sort: "desc" },
+  ];
+  const tags: TagOptions[] = [
+    { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?(-.*)?", sort: "semver" },
+    { filter: ".*", sort: "semver" },
+  ];
+  const metadata = { sha: undefined, date: undefined };
 
   test("calls gitSemver", async () => {
     await expect(main(["owner/name", "reference"], { GITHUB_TOKEN: "token" }))
@@ -99,20 +110,12 @@ describe("main", () => {
 
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
-    const branches: BranchOptions[] = [
-      { filter: "(main|master)", increment: "patch", sort: "desc" },
-      { filter: "release-.*", increment: "patch", sort: "desc" },
-      { filter: "hotfix-.*", increment: "patch", sort: "desc" },
-      { filter: "dev(elop)?", increment: "patch", sort: "desc" },
-      { filter: ".*", increment: "patch", sort: "desc" },
-    ];
-
     expect(mockGitSemver).toHaveBeenLastCalledWith(
       "token",
       "owner",
       "name",
       "reference",
-      { branches, metadata }
+      { branches, tags, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -141,7 +144,33 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches, metadata }
+      { branches, tags, metadata }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses tag filter option", async () => {
+    await expect(
+      main(["owner/name", "reference", "-t", "v\\d+\\.\\d+", "-t", "bob"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    const tags: TagOptions[] = [
+      { filter: "v\\d+\\.\\d+", sort: "semver" },
+      { filter: "bob", sort: "semver" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches, tags, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -170,7 +199,7 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches, metadata }
+      { branches, tags, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -179,7 +208,7 @@ describe("main", () => {
 
   test("uses branch sort option", async () => {
     await expect(
-      main(["owner/name", "reference", "-s", "semver"], {
+      main(["owner/name", "reference", "--branch-sort", "semver"], {
         GITHUB_TOKEN: "token",
       })
     ).resolves;
@@ -201,7 +230,35 @@ describe("main", () => {
       "owner",
       "name",
       "reference",
-      { branches, metadata }
+      { branches, tags, metadata }
+    );
+
+    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+  });
+
+  test("uses tag sort option", async () => {
+    await expect(
+      main(["owner/name", "reference", "--tag-sort", "asc"], {
+        GITHUB_TOKEN: "token",
+      })
+    ).resolves;
+    expect(mockStderr).toHaveBeenCalledTimes(0);
+    expect(mockExit).toHaveBeenCalledTimes(0);
+
+    expect(mockGitSemver).toHaveBeenCalledTimes(1);
+
+    const tags: TagOptions[] = [
+      { filter: "v?\\d+(\\.\\d+)?(\\.\\d+)?(-.*)?", sort: "asc" },
+      { filter: ".*", sort: "asc" },
+    ];
+
+    expect(mockGitSemver).toHaveBeenLastCalledWith(
+      "token",
+      "owner",
+      "name",
+      "reference",
+      { branches, tags, metadata }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -210,7 +267,7 @@ describe("main", () => {
 
   test("uses metadata sha option", async () => {
     await expect(
-      main(["owner/name", "reference", "-b", "main", "-g"], {
+      main(["owner/name", "reference", "-s"], {
         GITHUB_TOKEN: "token",
       })
     ).resolves;
@@ -219,16 +276,12 @@ describe("main", () => {
 
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
-    const branches: BranchOptions[] = [
-      { filter: "main", increment: "patch", sort: "desc" },
-    ];
-
     expect(mockGitSemver).toHaveBeenLastCalledWith(
       "token",
       "owner",
       "name",
       "reference",
-      { branches, metadata: { sha: true } }
+      { branches, tags, metadata: { sha: true } }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -237,7 +290,7 @@ describe("main", () => {
 
   test("uses build date option", async () => {
     await expect(
-      main(["owner/name", "reference", "-b", "main", "-d"], {
+      main(["owner/name", "reference", "-d"], {
         GITHUB_TOKEN: "token",
       })
     ).resolves;
@@ -246,16 +299,12 @@ describe("main", () => {
 
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
-    const branches: BranchOptions[] = [
-      { filter: "main", increment: "patch", sort: "desc" },
-    ];
-
     expect(mockGitSemver).toHaveBeenLastCalledWith(
       "token",
       "owner",
       "name",
       "reference",
-      { branches, metadata: { date: true } }
+      { branches, tags, metadata: { date: true } }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
@@ -264,7 +313,7 @@ describe("main", () => {
 
   test("uses build date option with format", async () => {
     await expect(
-      main(["owner/name", "reference", "-b", "main", "-d", "YYMM"], {
+      main(["owner/name", "reference", "-d", "YYMM"], {
         GITHUB_TOKEN: "token",
       })
     ).resolves;
@@ -273,16 +322,12 @@ describe("main", () => {
 
     expect(mockGitSemver).toHaveBeenCalledTimes(1);
 
-    const branches: BranchOptions[] = [
-      { filter: "main", increment: "patch", sort: "desc" },
-    ];
-
     expect(mockGitSemver).toHaveBeenLastCalledWith(
       "token",
       "owner",
       "name",
       "reference",
-      { branches, metadata: { date: "YYMM" } }
+      { branches, tags, metadata: { date: "YYMM" } }
     );
 
     expect(mockConsoleLog).toHaveBeenCalledTimes(1);
