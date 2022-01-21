@@ -127,16 +127,21 @@ const main = async (argv, env) => {
     sort: tagSort,
   }));
 
-  const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
-    branches,
-    tags,
-    metadata: {
-      sha: addBuildSha,
-      date: addBuildDate,
-    },
-  });
+  try {
+    const version = await gitSemver(GITHUB_TOKEN, owner, name, reference, {
+      branches,
+      tags,
+      metadata: {
+        sha: addBuildSha,
+        date: addBuildDate,
+      },
+    });
 
-  process.stdout.write(version);
+    process.stdout.write(version);
+  } catch (err) {
+    process.stderr.write(`error: ${err.message}\n`);
+    process.exit(1);
+  }
 };
 
 if (!module.parent) {

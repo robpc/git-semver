@@ -15,6 +15,15 @@
  */
 import { Octokit } from "@octokit/rest";
 
+import LoggerFactory from "@robpc/logger";
+
+const logger = LoggerFactory.get("git-semver:octokit");
+
+const error = (msg: string, err) => {
+  logger.debug(msg, err);
+  throw new Error(msg);
+};
+
 class Github {
   private owner: string;
   private repo: string;
@@ -36,7 +45,8 @@ class Github {
         owner: this.owner,
         repo: this.repo,
       })
-      .then((branches) => branches.map(({ name }) => name));
+      .then((branches) => branches.map(({ name }) => name))
+      .catch((err) => error("unable to load branches", err));
 
   tags = async () =>
     this.octokit
@@ -44,30 +54,41 @@ class Github {
         owner: this.owner,
         repo: this.repo,
       })
-      .then((tags) => tags.map(({ name }) => name));
+      .then((tags) => tags.map(({ name }) => name))
+      .catch((err) => error("unable to load tags", err));
 
   sha = async (ref: string): Promise<string> => {
-    const { data } = await this.octokit.rest.repos.getCommit({
-      owner: this.owner,
-      repo: this.repo,
-      ref,
-      mediaType: {
-        format: "sha",
-      },
-    });
+    try {
+      const { data } = await this.octokit.rest.repos.getCommit({
+        owner: this.owner,
+        repo: this.repo,
+        ref,
+        mediaType: {
+          format: "sha",
+        },
+      });
 
-    return data as unknown as string;
+      return data as unknown as string;
+    } catch (err) {
+      error("unable to load sha", err);
+    }
   };
 
   range = async (from: string, to: string, perPage: number = 100) => {
-    const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead({
-      owner: this.owner,
-      repo: this.repo,
-      basehead: `${from}...${to}`,
-      per_page: perPage,
-    });
+    try {
+      const { data } = await this.octokit.rest.repos.compareCommitsWithBasehead(
+        {
+          owner: this.owner,
+          repo: this.repo,
+          basehead: `${from}...${to}`,
+          per_page: perPage,
+        }
+      );
 
-    return data;
+      return data;
+    } catch (err) {
+      error("unable to load commit range ", err);
+    }
   };
 }
 

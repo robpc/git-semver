@@ -37,8 +37,16 @@ const findBranch = async (
   const branchNames = await github.branches();
   logger.debug("All branches:", branchNames.join(", "));
 
+  if (branchNames.length === 0) {
+    throw new Error("no branches returned");
+  }
+
   const branches = sortByRegexList(branchNames, branchPriority);
   logger.debug("Sorted branches:", branches.join(", "));
+
+  if (branches.length === 0) {
+    throw new Error("no branches match filters");
+  }
 
   let foundBranch = null;
   for (let i = 0; i < branches.length; i++) {
@@ -69,11 +77,19 @@ const findTag = async (
   const tagNames = await github.tags();
   logger.debug("All tags:", tagNames.join(", "));
 
+  if (tagNames.length === 0) {
+    throw new Error("no tags returned");
+  }
+
   const tags =
     tagPriority && tagPriority.length > 0
       ? sortByRegexList(tagNames, tagPriority)
       : tagNames;
   logger.debug("Sorted tags:", tags.join(", "));
+
+  if (tags.length === 0) {
+    throw new Error("no tags match filters");
+  }
 
   let foundTag = null;
   let foundTagDistance = null;
