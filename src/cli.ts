@@ -136,7 +136,7 @@ const main = async (argv, env) => {
     },
   });
 
-  console.log(version);
+  process.stdout.write(version);
 };
 
 if (!module.parent) {

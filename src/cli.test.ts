@@ -21,19 +21,19 @@ const mockExit = jest.spyOn(process, "exit").mockImplementation((num) => {
 });
 
 const mockStderr = jest.spyOn(process.stderr, "write");
-const mockConsoleLog = jest.spyOn(console, "log");
+const mockStdout = jest.spyOn(process.stdout, "write");
 
 afterAll(() => {
   mockExit.mockRestore();
+  mockStdout.mockRestore();
   mockStderr.mockRestore();
-  mockConsoleLog.mockRestore();
   mockGitSemver.mockRestore();
 });
 
 afterEach(() => {
   mockExit.mockClear();
+  mockStdout.mockClear();
   mockStderr.mockClear();
-  mockConsoleLog.mockClear();
   mockGitSemver.mockClear();
 });
 
@@ -118,8 +118,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses branch filter option", async () => {
@@ -147,8 +147,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses tag filter option", async () => {
@@ -173,8 +173,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses increment option", async () => {
@@ -202,8 +202,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses branch sort option", async () => {
@@ -233,8 +233,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses tag sort option", async () => {
@@ -261,8 +261,8 @@ describe("main", () => {
       { branches, tags, metadata }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses metadata sha option", async () => {
@@ -284,8 +284,8 @@ describe("main", () => {
       { branches, tags, metadata: { sha: true } }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses build date option", async () => {
@@ -307,8 +307,8 @@ describe("main", () => {
       { branches, tags, metadata: { date: true } }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 
   test("uses build date option with format", async () => {
@@ -330,7 +330,7 @@ describe("main", () => {
       { branches, tags, metadata: { date: "YYMM" } }
     );
 
-    expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mockConsoleLog).toHaveBeenCalledWith("1.0.0");
+    expect(mockStdout).toHaveBeenCalledTimes(1);
+    expect(mockStdout).toHaveBeenCalledWith("1.0.0");
   });
 });
