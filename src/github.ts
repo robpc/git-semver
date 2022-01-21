@@ -17,9 +17,17 @@ import { Octokit } from "@octokit/rest";
 
 import LoggerFactory from "@robpc/logger";
 
-const logger = LoggerFactory.get("git-semver:octokit");
+const logger = LoggerFactory.get("git-semver:github");
 
 const error = (msg: string, err) => {
+  if (err && err.name == "HttpError") {
+    if (err.message == "Bad credentials") {
+      throw new Error(`${msg}, bad credentials`);
+    }
+    if (err.message == "Not Found") {
+      throw new Error(`${msg}, not found`);
+    }
+  }
   logger.debug(msg, err);
   throw new Error(msg);
 };
